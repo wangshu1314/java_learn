@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 引入整合-->
+    <import resource="classpath:spring-mybatis.xml"/>
+    <!-- 事务管理 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 声明式事务配置 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!-- 配置事务属性 -->
+        <tx:attributes>
+            <tx:method name="add*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="insert*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="save*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="edit*" isolation="DEFAULT" propagation="REQUIRED" no-rollback-for="java.lang.Exception"/>
+            <!-- 只读操作 -->
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- aop 声明事务配置 (配置切入点,通知关联切入点) -->
+    <aop:config>
+        <!-- 切点 -->
+        <aop:pointcut id="tranPointCut" expression="execution(* org.rzc.service.*.*(..))"/>
+        <!-- 配置通知 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="tranPointCut"/>
+    </aop:config>
+
+    <!-- 第二种:注解方式事务配置 -->
+    <!--    <tx:annotation-driven transaction-manager="transactionManager"/>-->
+
+    <!-- 扫描 service 包下的注解-->
+    <context:component-scan base-package="org.rzc.service"/>
+</beans>
